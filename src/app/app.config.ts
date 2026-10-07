@@ -1,11 +1,24 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-
 import { routes } from './app.routes';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { jwtInterceptor } from './core/interceptors/jwt/jwt-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideBrowserGlobalErrorListeners(),
-    provideRouter(routes)
+    provideZoneChangeDetection({ eventCoalescing: true }), 
+    provideRouter(routes),
+    provideHttpClient(withInterceptors([jwtInterceptor])) 
   ]
 };
+// import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+// import { provideRouter } from '@angular/router';
+
+// import { routes } from './app.routes';
+
+// export const appConfig: ApplicationConfig = {
+//   providers: [
+//     provideBrowserGlobalErrorListeners(),
+//     provideRouter(routes)
+//   ]
+// };

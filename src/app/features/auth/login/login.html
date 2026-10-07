@@ -1,1 +1,32 @@
-<p>login works!</p>
+<div class="container d-flex justify-content-center align-items-center vh-100 bg-light">
+  <div class="card shadow-sm p-4" style="width: 100%; max-width: 400px;">
+    
+    <div class="text-center mb-4">
+      <h3 class="fw-bold text-primary">Gestor de Visitas</h3>
+      <p class="text-muted">Inicia sesión en tu cuenta</p>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger py-2">
+      {{ errorMessage }}
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      
+      <div class="mb-3">
+        <label for="email" class="form-label fw-semibold">Correo Electrónico</label>
+        <input type="email" id="email" class="form-control" formControlName="email" placeholder="ejemplo@correo.com" autofocus>
+      </div>
+
+      <div class="mb-4">
+        <label for="password" class="form-label fw-semibold">Contraseña</label>
+        <input type="password" id="password" class="form-control" formControlName="password" placeholder="••••••">
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" [disabled]="loginForm.invalid || isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        {{ isLoading ? 'Ingresando...' : 'Iniciar Sesión' }}
+      </button>
+
+    </form>
+  </div>
+</div>
