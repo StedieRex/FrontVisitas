@@ -5,9 +5,114 @@
   </div>
 </nav>
 
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
   <div class="card shadow-sm p-4">
-    <h4 class="mb-3">Registro de Nueva Visita</h4>
-    <p class="text-muted">Si estás viendo esto, el enrutamiento está perfecto.</p>
+    <h4 class="mb-4">Registro Completo de Visita</h4>
+    
+    <div *ngIf="successMessage" class="alert alert-success py-2 fw-semibold">
+      {{ successMessage }}
+    </div>
+
+    <form [formGroup]="visitForm" (ngSubmit)="onSubmit()">
+      
+      <!-- SECCIÓN 1: Ubicación -->
+      <h5 class="text-secondary mb-3">1. Ubicación y Cliente</h5>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">Cliente</label>
+          <select class="form-select" formControlName="clientId" (change)="onClientChange($event)">
+            <option value="" disabled selected>Selecciona un cliente...</option>
+            <option *ngFor="let client of clients" [value]="client.clientId">
+              {{ client.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">Domicilio a visitar</label>
+          <select class="form-select" formControlName="addressId">
+            <option value="" disabled selected>Selecciona el domicilio...</option>
+            <option *ngFor="let addr of availableAddresses" [value]="addr.addressId">
+              {{ addr.fullAddress }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <!-- SECCIÓN 2: Detalles de la Atención -->
+      <h5 class="text-secondary mb-3">2. Datos de la Visita</h5>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label fw-semibold">Atendido por</label>
+          <input type="text" class="form-control" formControlName="attendedBy" placeholder="Ej. El titular">
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label class="form-label fw-semibold">Parentesco</label>
+          <input type="text" class="form-control" formControlName="kinship" placeholder="Ej. Mismo, Cónyuge">
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label class="form-label fw-semibold">Actividad Comercial / Ocupación</label>
+          <input type="text" class="form-control" formControlName="businessActivity" placeholder="Ej. Empleado, Comerciante">
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">Descripción del Inmueble</label>
+          <input type="text" class="form-control" formControlName="propertyDescription" placeholder="Ej. Casa de un piso, reja negra">
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">¿Opera el negocio?</label>
+          <select class="form-select" formControlName="isOperating">
+            <option value="NO_APLICA">No Aplica</option>
+            <option value="SI">Sí</option>
+            <option value="NO">No</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Comentarios</label>
+        <textarea class="form-control" formControlName="comments" rows="3" placeholder="Detalles de la visita..."></textarea>
+      </div>
+
+      <hr class="my-4">
+
+      <!-- SECCIÓN 3: Promesa de Pago (Opcional) -->
+      <h5 class="text-secondary mb-3">3. Promesa de Pago (Opcional)</h5>
+      <div formGroupName="paymentPromise" class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">Monto Prometido</label>
+          <input type="number" step="0.01" class="form-control" formControlName="amount" placeholder="0.00">
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold">Fecha Prometida</label>
+          <input type="date" class="form-control" formControlName="promisedDate">
+        </div>
+      </div>
+
+      <hr class="my-4">
+
+      <!-- SECCIÓN 4: Evidencia -->
+      <div class="mb-4">
+        <label class="form-label fw-semibold">Evidencia Fotográfica (Opcional)</label>
+        <input type="file" class="form-control" #fileInput (change)="onFileChange($event)" accept="image/png, image/jpeg">
+      </div>
+
+      <!-- Botón de Envío -->
+      <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary px-5 fw-bold" [disabled]="visitForm.invalid || isSubmitting">
+          <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          {{ isSubmitting ? 'Guardando...' : 'Registrar Visita' }}
+        </button>
+      </div>
+
+    </form>
   </div>
 </div>

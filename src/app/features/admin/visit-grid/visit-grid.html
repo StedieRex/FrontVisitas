@@ -1,1 +1,61 @@
-<p>visit-grid works!</p>
+<nav class="navbar navbar-dark bg-dark shadow-sm">
+  <div class="container-fluid">
+    <span class="navbar-brand mb-0 h1">Panel de Administrador - Historial</span>
+    <button type="button" class="btn btn-outline-light btn-sm" (click)="logout()">Cerrar Sesión</button>
+  </div>
+</nav>
+
+<div class="container mt-4 mb-5">
+  <div class="card shadow-sm">
+    <div class="card-header bg-white py-3">
+      <h5 class="mb-0 text-secondary">Registro Global de Visitas</h5>
+    </div>
+    
+    <div class="card-body p-0">
+      
+      <!-- Indicador de Carga -->
+      <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-muted">Cargando historial...</p>
+      </div>
+
+      <!-- Mensaje si no hay visitas -->
+      <div *ngIf="!isLoading && visits.length === 0" class="text-center py-5">
+        <p class="text-muted mb-0">Aún no hay visitas registradas en el sistema.</p>
+      </div>
+
+      <!-- Tabla de Datos -->
+      <div class="table-responsive" *ngIf="!isLoading && visits.length > 0">
+        <table class="table table-hover table-striped align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th scope="col" class="px-4">ID</th>
+              <th scope="col">Cliente</th>
+              <th scope="col">Fecha</th>
+              <th scope="col">Resultado / Estatus</th>
+              <th scope="col" class="text-end px-4">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let v of visits">
+              <!-- Cambiamos v.visitId por (v.id || v.visitId) -->
+              <td class="px-4 fw-bold text-secondary">#{{ v.id || v.visitId }}</td>
+              <td>{{ v.clientName || 'Cliente ' + (v.id || v.visitId) }}</td>
+              <td>{{ v.visitDate | date:'medium' }}</td>
+              <td>
+                <span class="badge bg-info text-dark">{{ v.result || 'Registrada' }}</span>
+              </td>
+              <td class="text-end px-4">
+                <!-- AQUI ESTABA EL ERROR: Pasamos el id correcto a la función -->
+                <button class="btn btn-sm btn-primary" (click)="verDetalle(v.id || v.visitId)">
+                  Ver Detalle
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>

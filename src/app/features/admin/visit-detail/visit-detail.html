@@ -1,1 +1,63 @@
-<p>visit-detail works!</p>
+<nav class="navbar navbar-dark bg-dark shadow-sm">
+  <div class="container-fluid">
+    <span class="navbar-brand mb-0 h1">Panel de Administrador - Detalle</span>
+    <button class="btn btn-outline-light btn-sm" (click)="volver()">Volver al Historial</button>
+  </div>
+</nav>
+
+<div class="container mt-4 mb-5">
+  
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-2 text-muted">Cargando información de la visita...</p>
+  </div>
+
+  <div *ngIf="!isLoading && visit" class="card shadow-sm">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+      <h5 class="mb-0 text-secondary">Visita #{{ visit.visitId || visit.id }}</h5>
+      <span class="badge bg-success">Completada</span>
+    </div>
+    
+    <div class="card-body">
+      <div class="row">
+        
+        <!-- Columna de Datos de Texto -->
+        <div class="col-md-7">
+          <h6 class="text-primary border-bottom pb-2 mb-3">Información General</h6>
+          <p><strong>Cliente:</strong> {{ visit.clientName || 'N/A' }}</p>
+          <p><strong>Atendido por:</strong> {{ visit.attendedBy || 'N/A' }} ({{ visit.kinship || 'N/A' }})</p>
+          <p><strong>Fecha de Visita:</strong> {{ visit.visitDate | date:'medium' }}</p>
+          
+          <h6 class="text-primary border-bottom pb-2 mb-3 mt-4">Detalles del Inmueble y Negocio</h6>
+          <p><strong>Descripción:</strong> {{ visit.propertyDescription || 'N/A' }}</p>
+          <p><strong>Actividad Comercial:</strong> {{ visit.businessActivity || 'N/A' }}</p>
+          <p><strong>¿Se encuentra operando?:</strong> {{ visit.isOperating || 'N/A' }}</p>
+
+          <h6 class="text-primary border-bottom pb-2 mb-3 mt-4">Resultados</h6>
+          <p><strong>Comentarios:</strong> {{ visit.comments || 'Sin comentarios adicionales.' }}</p>
+          
+          <div *ngIf="visit.paymentPromise" class="alert alert-info mt-3">
+            <strong>Promesa de Pago:</strong> ${{ visit.paymentPromise.amount }} para el {{ visit.paymentPromise.promisedDate | date:'longDate' }}
+          </div>
+        </div>
+
+        <!-- Columna de Evidencia Fotográfica -->
+        <div class="col-md-5 border-start">
+          <h6 class="text-primary border-bottom pb-2 mb-3">Evidencia Fotográfica</h6>
+          
+          <div *ngIf="visit.photoUrl; else noPhoto" class="text-center">
+            <!-- Si tu backend devuelve la URL o el Base64 de la foto -->
+            <img [src]="visit.photoUrl" alt="Evidencia de Visita" class="img-fluid rounded shadow-sm" style="max-height: 400px; width: auto;">
+          </div>
+          
+          <ng-template #noPhoto>
+            <div class="alert alert-secondary text-center py-4">
+              <p class="mb-0 text-muted">No se adjuntó fotografía en esta visita.</p>
+            </div>
+          </ng-template>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
