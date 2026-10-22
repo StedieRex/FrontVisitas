@@ -39,9 +39,13 @@ export class VisitGrid implements OnInit {
     });
   }
 
-  verDetalle(visitId: number) {
-    // Navegaremos a la pantalla de detalle pasando el ID en la URL
-    this.router.navigate(['/admin/visita', visitId]);
+  // Actualizamos para que acepte number o undefined
+  verDetalle(id: number | undefined) {
+    if (id) { // Solo navega si el ID realmente existe
+      this.router.navigate(['/admin/visita', id]);
+    } else {
+      console.error('No se encontró el ID de esta visita');
+    }
   }
 
   logout() {
