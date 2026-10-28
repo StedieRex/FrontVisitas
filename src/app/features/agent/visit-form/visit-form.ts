@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { VisitService } from '../../../core/services/visit/visit'; 
 import { AuthService } from '../../../core/services/auth/auth'; 
-import { ClientActiveDTO, AddressDTO } from '../../../core/models/client.model';
 
 @Component({
   selector: 'app-visit-form',
@@ -15,51 +14,76 @@ import { ClientActiveDTO, AddressDTO } from '../../../core/models/client.model';
 export class VisitForm implements OnInit {
   @ViewChild('fileInput') fileInput!: ElementRef;
   visitForm: FormGroup;
-  clients: ClientActiveDTO[] = [];
-  availableAddresses: AddressDTO[] = [];
   
-  selectedFile: File | null = null;
-  isSubmitting: boolean = false;
-  successMessage: string = '';
+  // Catálogos y Datos
+  clients: any[] = [];
+  selectedClient: any = null;
+  availableAddresses: any[] = [];
+  
+  actionCodes: any[] = [];
+  visitResults: any[] = [];
+  noPaymentReasons: any[] = [];
+  addressTypes: any[] = [];
+  portfolios: any[] = [];
 
-  constructor(
-    private fb: FormBuilder, 
-    private visitService: VisitService,
-    private authService: AuthService
-  ) {
-    // Formulario ampliado con todos los campos del JSON
+  selectedFile: File | null = null;
+  isSubmitting = false;
+  successMessage = '';
+
+  constructor(private fb: FormBuilder, private visitService: VisitService, private authService: AuthService) {
     this.visitForm = this.fb.group({
       clientId: ['', Validators.required],
-      addressId: ['', Validators.required],
-      actionCodeId: [1, Validators.required],
-      resultId: [7, Validators.required],
-      noPaymentReasonId: [null],
+      addressId: ['', Validators.required], // Dirección específica del cliente
+      visitDate: ['', Validators.required],
+      addressTypeId: ['', Validators.required],
       attendedBy: ['', Validators.required],
-      kinship: ['', Validators.required],
+      actionCodeId: ['', Validators.required],
+      resultId: ['', Validators.required],
+      noPaymentReasonId: [''],
+      promiseDate: [''],
+      promiseAmount: [''],
       comments: ['', Validators.required],
-      propertyDescription: ['', Validators.required],
-      businessActivity: ['', Validators.required],
-      isOperating: ['NO_APLICA', Validators.required],
-      // Subgrupo para la promesa de pago
-      paymentPromise: this.fb.group({
-        amount: [null],
-        promisedDate: ['']
-      })
+      businessActivity: [''],
+      isOperating: ['SI'],
+      latitude: [{value: '', disabled: true}],
+      longitude: [{value: '', disabled: true}],
+      additionalContactName: [''],
+      additionalContactPhone: [''],
+      additionalContactEmail: ['']
     });
   }
 
   ngOnInit() {
-    this.visitService.getClients().subscribe({
-      next: (data: any) => { this.clients = data; },
-      error: (err: any) => { console.error('Error al cargar clientes', err); }
+    this.cargarDatos();
+  }
+
+  cargarDatos() {
+    // 1. Cargar Clientes
+    this.visitService.getClients().subscribe(data => this.clients = data);
+
+    // 2. Cargar Catálogos con Logs
+    this.visitService.getCatalogs().subscribe({
+      next: (data) => {
+        console.log('✅ Catálogos recibidos del backend:', data);
+        this.actionCodes = data.actionCodes;
+        this.visitResults = data.visitResults;
+        this.noPaymentReasons = data.noPaymentReasons;
+        this.addressTypes = data.addressTypes;
+        this.portfolios = data.portfolios;
+      },
+      error: (err) => {
+        console.error('❌ Error al pedir los catálogos:', err);
+      }
     });
   }
 
   onClientChange(event: any) {
     const selectedClientId = Number(event.target.value);
-    const selectedClient = this.clients.find(c => c.clientId === selectedClientId);
-    if (selectedClient) {
-      this.availableAddresses = selectedClient.addresses;
+    this.selectedClient = this.clients.find(c => (c.clientId || c.id) === selectedClientId);
+    
+    if (this.selectedClient) {
+      // Ajusta 'addresses' según cómo venga en tu DTO de clientes
+      this.availableAddresses = this.selectedClient.addresses || [this.selectedClient]; 
     } else {
       this.availableAddresses = [];
     }
@@ -72,68 +96,98 @@ export class VisitForm implements OnInit {
     }
   }
 
-  onSubmit() {
-    if (this.visitForm.valid) {
-      this.isSubmitting = true;
-      this.successMessage = '';
-
-      // Construimos el DTO con la estructura exacta que pide el backend
-      const formValues = this.visitForm.value;
-      const visitRequestDTO = {
-        clientId: Number(formValues.clientId),
-        addressId: Number(formValues.addressId),
-        actionCodeId: Number(formValues.actionCodeId),
-        resultId: Number(formValues.resultId),
-        noPaymentReasonId: formValues.noPaymentReasonId ? Number(formValues.noPaymentReasonId) : null,
-        attendedBy: formValues.attendedBy,
-        kinship: formValues.kinship,
-        comments: formValues.comments,
-        propertyDescription: formValues.propertyDescription,
-        businessActivity: formValues.businessActivity,
-        isOperating: formValues.isOperating,
-        paymentPromise: formValues.paymentPromise.amount ? {
-          amount: Number(formValues.paymentPromise.amount),
-          promisedDate: formValues.paymentPromise.promisedDate
-        } : null
-      };
-
-      this.visitService.createVisit(visitRequestDTO).subscribe({
-        next: (response: any) => {
-          if (this.selectedFile && response.visitId) {
-            this.visitService.uploadPhoto(response.visitId, this.selectedFile).subscribe({
-              next: () => this.finalizarFormulario(),
-              error: (err) => {
-                console.error('Error al subir foto', err);
-                alert('La visita se guardó, pero hubo un error al subir la foto.');
-                this.isSubmitting = false;
-              }
-            });
-          } else {
-            this.finalizarFormulario();
-          }
+  obtenerUbicacion() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          this.visitForm.patchValue({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
         },
-        error: (err) => {
-          this.isSubmitting = false;
-          console.error('Error al guardar la visita', err);
-          alert('Hubo un error al registrar la visita.');
+        (error) => {
+          alert('Error al obtener la ubicación GPS.');
+          console.error(error);
         }
-      });
+      );
+    } else {
+      alert('Tu navegador no soporta geolocalización.');
     }
+  }
+
+  onSubmit() {
+    if (this.visitForm.invalid) {
+      this.visitForm.markAllAsTouched();
+      return;
+    }
+    
+    this.isSubmitting = true;
+    this.successMessage = '';
+    const formValues = this.visitForm.getRawValue();
+
+    console.log('Datos completos del formulario:', formValues);
+    console.log(JSON.stringify(formValues, null, 2));
+
+    // Mapeo exacto hacia tu Backend
+    const visitRequestDTO = {
+      clientId: Number(formValues.clientId),
+      addressId: Number(formValues.addressId),
+      addressTypeId: Number(formValues.addressTypeId),
+      actionCodeId: Number(formValues.actionCodeId),
+      resultId: Number(formValues.resultId),
+      noPaymentReasonId: formValues.noPaymentReasonId ? Number(formValues.noPaymentReasonId) : null,
+      attendedBy: formValues.attendedBy,
+      comments: formValues.comments,
+      businessActivity: formValues.businessActivity,
+      isOperating: formValues.isOperating,
+      visitedAt: formValues.visitDate, // Mapeado a visitedAt si tu backend lo espera así
+      latitude: formValues.latitude,
+      longitude: formValues.longitude,
+      additionalContactName: formValues.additionalContactName,
+      additionalContactPhone: formValues.additionalContactPhone,
+      additionalContactEmail: formValues.additionalContactEmail,
+      paymentPromise: formValues.promiseAmount ? {
+        amount: Number(formValues.promiseAmount),
+        promisedDate: formValues.promiseDate
+      } : null
+    };
+
+    this.visitService.createVisit(visitRequestDTO).subscribe({
+      next: (response: any) => {
+        if (this.selectedFile && (response.visitId || response.id)) {
+          const id = response.visitId || response.id;
+          this.visitService.uploadPhoto(id, this.selectedFile).subscribe({
+            next: () => this.finalizarFormulario(),
+            error: (err) => {
+              console.error('Error al subir foto', err);
+              alert('La visita se guardó, pero hubo un error con la foto.');
+              this.finalizarFormulario();
+            }
+          });
+        } else {
+          this.finalizarFormulario();
+        }
+      },
+      error: (err) => {
+        this.isSubmitting = false;
+        console.error('Error al guardar', err);
+        alert('Hubo un error al registrar la visita.');
+      }
+    });
   }
 
   private finalizarFormulario() {
     this.isSubmitting = false;
-    this.successMessage = '¡Visita registrada correctamente!';
+    this.successMessage = '¡Visita registrada exitosamente!';
     this.visitForm.reset({
-      actionCodeId: 1,
-      resultId: 7,
-      isOperating: 'NO_APLICA'
+      isOperating: 'SI'
     });
+    this.selectedClient = null;
     this.selectedFile = null;
     this.availableAddresses = [];
     if (this.fileInput) this.fileInput.nativeElement.value = '';
     
-    setTimeout(() => this.successMessage = '', 3000);
+    setTimeout(() => this.successMessage = '', 4000);
   }
 
   logout() {

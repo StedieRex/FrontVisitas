@@ -39,4 +39,9 @@ export class VisitService {
   getVisitById(visitId: number): Observable<any> {
     return this.http.get<any>(`${environment.apiUrl}/admin/visitas/${visitId}`);
   }
+
+  getCatalogs(): Observable<any> {
+    // Apuntamos explícitamente a la ruta global de catálogos
+    return this.http.get<any>('http://localhost:8080/api/catalogos');
+  }
 }
