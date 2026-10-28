@@ -50,5 +50,6 @@ export class VisitGrid implements OnInit {
 
   logout() {
     this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }

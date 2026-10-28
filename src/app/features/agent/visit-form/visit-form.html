@@ -43,6 +43,20 @@
             <label class="text-muted small">N° Crédito / Cliente</label>
             <div class="fw-semibold">{{ selectedClient.creditNumber || selectedClient.clientId || selectedClient.id }}</div>
           </div>
+
+          <!-- Domicilio mostrado como información de solo lectura -->
+          <div class="col-md-12 mt-3">
+            <label class="text-muted small d-block mb-1 fw-semibold">Domicilio Registrado</label>
+            <div *ngIf="availableAddresses.length > 0; else noAddress">
+              <div *ngFor="let dir of availableAddresses" class="p-2 border rounded bg-white fw-semibold text-dark mb-2 shadow-sm">
+                {{ dir.street }} {{ dir.number }}, Col. {{ dir.neighborhood }}, {{ dir.city }}, {{ dir.state }}, CP: {{ dir.zipCode }}
+              </div>
+            </div>
+            <ng-template #noAddress>
+              <div class="text-muted fst-italic">No hay domicilios registrados para este cliente.</div>
+            </ng-template>
+          </div>
+
         </div>
       </div>
     </div>
@@ -56,15 +70,6 @@
         <div class="row g-3">
 
           <!-- Domicilio Específico -->
-          <div class="col-md-12 mb-2">
-            <label class="form-label fw-semibold">Domicilio a Visitar (Calle, Núm, Col, Mun, Est, CP)</label>
-            <select class="form-select" formControlName="addressId">
-              <option value="" disabled selected>Seleccione el domicilio...</option>
-              <option *ngFor="let dir of availableAddresses" [value]="dir.id">
-                {{ dir.street }} {{ dir.number }}, Col. {{ dir.neighborhood }}, {{ dir.city }}, {{ dir.state }}, CP: {{ dir.zipCode }}
-              </option>
-            </select>
-          </div>
           
           <div class="col-md-4">
             <label class="form-label fw-semibold">Fecha y Hora</label>

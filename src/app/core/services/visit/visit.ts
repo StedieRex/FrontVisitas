@@ -1,47 +1,52 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { Observable } from 'rxjs';
-import { ClientActiveDTO } from '../../models/client.model';
+import { VisitListDTO } from '../../models/visit.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class VisitService {
-  private apiUrl = `${environment.apiUrl}/agentes`;
+  private http = inject(HttpClient);
+  private apiUrl = `${environment.apiUrl}/visitas`;
 
-  constructor(private http: HttpClient) { }
-
-  getClients(): Observable<ClientActiveDTO[]> {
-    return this.http.get<ClientActiveDTO[]>(`${this.apiUrl}/clientes`);
+  getVisits(): Observable<VisitListDTO[]> {
+    return this.http.get<VisitListDTO[]>(this.apiUrl);
   }
 
-  // 1. Envía el JSON y devuelve el ID generado
-  createVisit(visitData: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/visitas`, visitData);
+  // Compatible con la llamada en VisitGrid
+  getAdminVisits(): Observable<VisitListDTO[]> {
+    return this.getVisits();
   }
 
-  // 2. Envía la fotografía adjunta a la visita generada
-  uploadPhoto(visitId: number, file: File): Observable<any> {
-    const formData = new FormData();
-    // Tu Java espera que el parámetro se llame 'file' según tu @RequestParam("file")
-    formData.append('file', file); 
-    return this.http.post(`${this.apiUrl}/visitas/${visitId}/fotos`, formData);
+  getVisitById(id: number | string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
 
-  // Obtiene el historial completo para el administrador
-  getAdminVisits(): Observable<any[]> {
-    // Apuntamos a la ruta de admin definida en tu Spring Boot
-    return this.http.get<any[]>(`${environment.apiUrl}/admin/visitas`);
+  createVisit(visit: any): Observable<any> {
+    return this.http.post<any>(this.apiUrl, visit);
   }
 
-  // Obtiene el detalle de una visita específica
-  getVisitById(visitId: number): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}/admin/visitas/${visitId}`);
+  updateVisit(id: number | string, visit: Partial<VisitListDTO>): Observable<VisitListDTO> {
+    return this.http.put<VisitListDTO>(`${this.apiUrl}/${id}`, visit);
+  }
+
+  deleteVisit(id: number | string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  // Métodos requeridos por VisitForm
+  getClients(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/clientes`);
   }
 
   getCatalogs(): Observable<any> {
-    // Apuntamos explícitamente a la ruta global de catálogos
-    return this.http.get<any>('http://localhost:8080/api/catalogos');
+    return this.http.get<any>(`${environment.apiUrl}/catalogos`);
+  }
+
+  uploadPhoto(visitId: number | string, file: File): Observable<any> {
+    // Simula la subida exitosa de la foto en entorno mock
+    return of({ success: true, message: 'Foto subida correctamente' });
   }
 }

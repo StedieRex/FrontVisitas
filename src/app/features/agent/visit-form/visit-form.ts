@@ -1,6 +1,7 @@
 import { Component, OnInit, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router'; // 1. IMPORTAR ROUTER
 import { VisitService } from '../../../core/services/visit/visit'; 
 import { AuthService } from '../../../core/services/auth/auth'; 
 
@@ -30,10 +31,16 @@ export class VisitForm implements OnInit {
   isSubmitting = false;
   successMessage = '';
 
-  constructor(private fb: FormBuilder, private visitService: VisitService, private authService: AuthService) {
+  // 2. INYECTAR ROUTER EN EL CONSTRUCTOR
+  constructor(
+    private fb: FormBuilder, 
+    private visitService: VisitService, 
+    private authService: AuthService,
+    private router: Router
+  ) {
     this.visitForm = this.fb.group({
       clientId: ['', Validators.required],
-      addressId: ['', Validators.required], // Dirección específica del cliente
+      addressId: [''], // Dirección específica del cliente
       visitDate: ['', Validators.required],
       addressTypeId: ['', Validators.required],
       attendedBy: ['', Validators.required],
@@ -77,18 +84,25 @@ export class VisitForm implements OnInit {
     });
   }
 
-  onClientChange(event: any) {
-    const selectedClientId = Number(event.target.value);
-    this.selectedClient = this.clients.find(c => (c.clientId || c.id) === selectedClientId);
+ onClientChange(event: any) {
+  const selectedClientId = Number(event.target.value);
+  this.selectedClient = this.clients.find(c => (c.clientId || c.id) === selectedClientId);
+  
+  if (this.selectedClient) {
+    this.availableAddresses = this.selectedClient.addresses || [this.selectedClient];
     
-    if (this.selectedClient) {
-      // Ajusta 'addresses' según cómo venga en tu DTO de clientes
-      this.availableAddresses = this.selectedClient.addresses || [this.selectedClient]; 
-    } else {
-      this.availableAddresses = [];
+    // Autoasignamos el ID de la dirección disponible al control del formulario
+    const firstAddress = this.availableAddresses[0];
+    if (firstAddress) {
+      this.visitForm.patchValue({
+        addressId: firstAddress.id || firstAddress.addressId || selectedClientId
+      });
     }
+  } else {
+    this.availableAddresses = [];
     this.visitForm.get('addressId')?.setValue('');
   }
+}
 
   onFileChange(event: any) {
     if (event.target.files && event.target.files.length > 0) {
@@ -190,7 +204,9 @@ export class VisitForm implements OnInit {
     setTimeout(() => this.successMessage = '', 4000);
   }
 
+  // 3. ACTUALIZAR LOGOUT PARA REDIRIGIR A LOGIN
   logout() {
     this.authService.logout();
+    this.router.navigate(['/login']);
   }
 }
