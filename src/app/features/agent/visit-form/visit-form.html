@@ -16,10 +16,12 @@
     <!-- 1. SELECCIÓN DE CLIENTE -->
     <div class="card shadow-sm mb-4">
       <div class="card-body bg-light">
-        <label class="form-label fw-bold text-primary">Buscar Cliente / Auditado</label>
-        <select class="form-select form-select-lg" formControlName="clientId" (change)="onClientChange($event)">
+        <label for="clientId" class="form-label fw-bold text-primary">Buscar Cliente / Auditado</label>
+        <select id="clientId" class="form-select form-select-lg" formControlName="clientId" (change)="onClientChange($event)">
           <option value="" disabled selected>-- Seleccione un cliente --</option>
-          <option *ngFor="let c of clients" [value]="c.clientId || c.id">{{ c.name || 'Cliente ' + (c.clientId || c.id) }}</option>
+          <option *ngFor="let c of clients" [value]="c.id">
+            {{ c.name }} (Crédito: {{ c.creditNumber || 'N/A' }})
+          </option>
         </select>
       </div>
     </div>

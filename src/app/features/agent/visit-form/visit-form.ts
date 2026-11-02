@@ -65,46 +65,60 @@ export class VisitForm implements OnInit {
   }
 
   cargarDatos() {
-    // Obtener el ID del agente autenticado desde el token/usuario
-    const agentId = Number(localStorage.getItem('userId')) || 2; // fallback para pruebas mock
+    // 1. Obtener el ID del agente que inició sesión (fallback a 2 si no existe)
+    const agentId = this.authService.getUserId() || 2; 
 
-    // Cargar únicamente los clientes asignados a este agente
+    console.log('🔍 Cargando clientes asignados para el agentId:', agentId);
+
+    // 2. Cargar Clientes filtrados por ese Agente
     this.visitService.getClientsByAgent(agentId).subscribe({
       next: (data) => {
+        console.log('✅ Clientes asignados recibidos:', data);
         this.clients = data;
       },
-      error: (err) => console.error('Error al cargar clientes del agente:', err)
+      error: (err) => {
+        console.error('❌ Error al obtener clientes del agente:', err);
+      }
     });
 
-    // Cargar catálogos...
-    this.visitService.getCatalogs().subscribe(data => {
-      this.actionCodes = data.actionCodes;
-      this.visitResults = data.visitResults;
-      this.noPaymentReasons = data.noPaymentReasons;
-      this.addressTypes = data.addressTypes;
-      this.portfolios = data.portfolios;
+    // 3. Cargar Catálogos
+    this.visitService.getCatalogs().subscribe({
+      next: (data) => {
+        this.actionCodes = data.actionCodes;
+        this.visitResults = data.visitResults;
+        this.noPaymentReasons = data.noPaymentReasons;
+        this.addressTypes = data.addressTypes;
+        this.portfolios = data.portfolios;
+      },
+      error: (err) => console.error('❌ Error al pedir catálogos:', err)
     });
-  } 
-
- onClientChange(event: any) {
-  const selectedClientId = Number(event.target.value);
-  this.selectedClient = this.clients.find(c => (c.clientId || c.id) === selectedClientId);
-  
-  if (this.selectedClient) {
-    this.availableAddresses = this.selectedClient.addresses || [this.selectedClient];
-    
-    // Autoasignamos el ID de la dirección disponible al control del formulario
-    const firstAddress = this.availableAddresses[0];
-    if (firstAddress) {
-      this.visitForm.patchValue({
-        addressId: firstAddress.id || firstAddress.addressId || selectedClientId
-      });
-    }
-  } else {
-    this.availableAddresses = [];
-    this.visitForm.get('addressId')?.setValue('');
   }
-}
+
+  onClientChange(event: any) {
+    const selectedId = event.target.value;
+    
+    // Comparamos convirtiendo a String para soportar IDs alfanuméricos ("IEuxvvUXZQA") y numéricos ("1")
+    this.selectedClient = this.clients.find(c => String(c.id) === String(selectedId));
+
+    if (this.selectedClient) {
+      // Asignamos los domicilios correspondientes al cliente seleccionado
+      this.availableAddresses = this.selectedClient.addresses || [];
+      
+      // Autoasignamos el ID de la primera dirección disponible
+      const firstAddress = this.availableAddresses[0];
+      if (firstAddress) {
+        this.visitForm.patchValue({
+          addressId: firstAddress.id || 1
+        });
+      } else {
+        this.visitForm.get('addressId')?.setValue('');
+      }
+    } else {
+      this.selectedClient = null;
+      this.availableAddresses = [];
+      this.visitForm.get('addressId')?.setValue('');
+    }
+  }
 
   onFileChange(event: any) {
     if (event.target.files && event.target.files.length > 0) {

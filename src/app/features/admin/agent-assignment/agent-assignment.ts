@@ -73,6 +73,7 @@ export class AgentAssignment implements OnInit {
         });
 
         // Construcción de la estructura DTO para el cliente y sus datos de auditoría
+        // En agent-assignment.ts -> procesarContenidoCSV()
         clients.push({
           creditNumber: row.creditNumber,
           name: row.clientName,
@@ -89,6 +90,7 @@ export class AgentAssignment implements OnInit {
               zipCode: row.zipCode
             }
           ]
+          // NOTA: No incluimos "clientId: 101" para evitar IDs duplicados
         });
       }
     }
