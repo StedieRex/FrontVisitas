@@ -65,24 +65,26 @@ export class VisitForm implements OnInit {
   }
 
   cargarDatos() {
-    // 1. Cargar Clientes
-    this.visitService.getClients().subscribe(data => this.clients = data);
+    // Obtener el ID del agente autenticado desde el token/usuario
+    const agentId = Number(localStorage.getItem('userId')) || 2; // fallback para pruebas mock
 
-    // 2. Cargar Catálogos con Logs
-    this.visitService.getCatalogs().subscribe({
+    // Cargar únicamente los clientes asignados a este agente
+    this.visitService.getClientsByAgent(agentId).subscribe({
       next: (data) => {
-        console.log('✅ Catálogos recibidos del backend:', data);
-        this.actionCodes = data.actionCodes;
-        this.visitResults = data.visitResults;
-        this.noPaymentReasons = data.noPaymentReasons;
-        this.addressTypes = data.addressTypes;
-        this.portfolios = data.portfolios;
+        this.clients = data;
       },
-      error: (err) => {
-        console.error('❌ Error al pedir los catálogos:', err);
-      }
+      error: (err) => console.error('Error al cargar clientes del agente:', err)
     });
-  }
+
+    // Cargar catálogos...
+    this.visitService.getCatalogs().subscribe(data => {
+      this.actionCodes = data.actionCodes;
+      this.visitResults = data.visitResults;
+      this.noPaymentReasons = data.noPaymentReasons;
+      this.addressTypes = data.addressTypes;
+      this.portfolios = data.portfolios;
+    });
+  } 
 
  onClientChange(event: any) {
   const selectedClientId = Number(event.target.value);

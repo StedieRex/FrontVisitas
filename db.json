@@ -1,28 +1,31 @@
 {
   "users": [
     {
-      "id": 1,
+      "id": "1",
       "email": "admin@correo.com",
       "password": "123",
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock-admin-token",
-      "role": "ADMINISTRADOR"
+      "token": "token-admin",
+      "role": "ADMINISTRADOR",
+      "name": "Administrador Principal"
     },
     {
-      "id": 2,
-      "email": "agente@correo.com",
+      "id": "2",
+      "email": "agente1@correo.com",
       "password": "123",
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock-agent-token",
-      "role": "AGENTE"
+      "token": "token-agente-1",
+      "role": "AGENTE",
+      "name": "Carlos López (Agente 1)"
     }
   ],
   "clientes": [
     {
-      "id": 1,
+      "id": "1",
       "clientId": 101,
+      "creditNumber": "CR-998811",
       "name": "Empresa Alfa S.A.",
       "despacho": "Despacho Jurídico Central",
       "portfolio": "Portafolio Comercial A",
-      "creditNumber": "CR-998811",
+      "agentId": 2,
       "addresses": [
         {
           "id": 1,
@@ -34,45 +37,103 @@
           "zipCode": "72000"
         }
       ]
+    },
+    {
+      "creditNumber": "CR-2001",
+      "name": "Carlos Mendoza",
+      "despacho": "Despacho Central",
+      "portfolio": "Portafolio A",
+      "addresses": [
+        {
+          "id": 1793236884083,
+          "street": "Av. Reforma",
+          "number": "123",
+          "neighborhood": "Centro",
+          "city": "Puebla",
+          "state": "Puebla",
+          "zipCode": "72000"
+        }
+      ],
+      "agentId": 3,
+      "id": "IEuxvvUXZQA"
+    },
+    {
+      "creditNumber": "CR-2002",
+      "name": "Beatriz Torres",
+      "despacho": "Despacho Jurídico Sur",
+      "portfolio": "Portafolio B",
+      "addresses": [
+        {
+          "id": 1793236884085,
+          "street": "Calle 5 de Mayo",
+          "number": "456",
+          "neighborhood": "San José",
+          "city": "Puebla",
+          "state": "Puebla",
+          "zipCode": "72010"
+        }
+      ],
+      "agentId": 3,
+      "id": "Jv5VIYQMwmo"
     }
   ],
   "catalogos": {
     "actionCodes": [
-      { "id": 1, "code": "AC01", "description": "Visita Ocular Directa" }
+      {
+        "id": 1,
+        "code": "AC01",
+        "description": "Visita Ocular Directa"
+      },
+      {
+        "id": 2,
+        "code": "AC02",
+        "description": "Llamada Telefónica"
+      }
     ],
     "visitResults": [
-      { "id": 1, "code": "VR01", "description": "Promesa de Pago Obtenida" }
+      {
+        "id": 1,
+        "code": "VR01",
+        "description": "Promesa de Pago Obtenida"
+      },
+      {
+        "id": 2,
+        "code": "VR02",
+        "description": "Inmueble Desocupado"
+      }
     ],
     "noPaymentReasons": [
-      { "id": 1, "code": "NP01", "description": "Falta de liquidez temporal" }
+      {
+        "id": 1,
+        "code": "NP01",
+        "description": "Falta de liquidez temporal"
+      },
+      {
+        "id": 2,
+        "code": "NP02",
+        "description": "Desempleo / Sin Ingresos"
+      }
     ],
     "addressTypes": [
-      { "id": 1, "code": "DIR01", "description": "Particular / Domicilio Fiscal" }
+      {
+        "id": 1,
+        "code": "DIR01",
+        "description": "Particular / Domicilio Fiscal"
+      },
+      {
+        "id": 2,
+        "code": "DIR02",
+        "description": "Negocio / Comercio"
+      }
     ],
     "portfolios": [
-      { "id": 1, "code": "PORT01", "description": "Portafolio Principal" }
+      {
+        "id": 1,
+        "code": "PORT01",
+        "description": "Portafolio Principal"
+      }
     ]
   },
-  "visitas": [
-    {
-      "id": 1,
-      "visitId": 1,
-      "clientId": 101,
-      "clientName": "Empresa Alfa S.A.",
-      "attendedBy": "Claudia Sobrina",
-      "kinship": "Familiar / Encargada",
-      "visitDate": "2026-10-28T10:00:00Z",
-      "visitedAt": "2026-10-28T10:00:00Z",
-      "propertyDescription": "Fachada beige oscuro, portón color oro",
-      "businessActivity": "Venta de Abarrotes",
-      "isOperating": "SI",
-      "comments": "El cliente confirma compromiso de liquidación para la siguiente semana.",
-      "result": "Promesa de Pago Obtenida",
-      "paymentPromise": {
-        "amount": 4500,
-        "promisedDate": "2026-11-05"
-      },
-      "photoUrl": "https://via.placeholder.com/400x300?text=Evidencia+Fotografica"
-    }
-  ]
+  "visitas": [],
+  "$schema": "./node_modules/json-server/schema.json"
 }

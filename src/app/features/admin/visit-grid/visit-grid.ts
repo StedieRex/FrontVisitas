@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { VisitService } from '../../../core/services/visit/visit';
 import { AuthService } from '../../../core/services/auth/auth';
-import { VisitListDTO } from '../../../core/models/visit.model'; // Ajusta si no creaste el modelo
+import { VisitListDTO } from '../../../core/models/visit.model';
 
 @Component({
   selector: 'app-visit-grid',
@@ -39,13 +39,16 @@ export class VisitGrid implements OnInit {
     });
   }
 
-  // Actualizamos para que acepte number o undefined
   verDetalle(id: number | undefined) {
-    if (id) { // Solo navega si el ID realmente existe
+    if (id) {
       this.router.navigate(['/admin/visita', id]);
     } else {
       console.error('No se encontró el ID de esta visita');
     }
+  }
+
+  irAAsignacion() {
+    this.router.navigate(['/admin/asignacion']);
   }
 
   logout() {

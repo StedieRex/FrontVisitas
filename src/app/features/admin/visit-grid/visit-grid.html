@@ -1,7 +1,12 @@
 <nav class="navbar navbar-dark bg-dark shadow-sm">
   <div class="container-fluid">
     <span class="navbar-brand mb-0 h1">Panel de Administrador - Historial</span>
-    <button type="button" class="btn btn-outline-light btn-sm" (click)="logout()">Cerrar Sesión</button>
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-outline-info btn-sm" (click)="irAAsignacion()">
+        Asignar Agentes / Carga CSV
+      </button>
+      <button type="button" class="btn btn-outline-light btn-sm" (click)="logout()">Cerrar Sesión</button>
+    </div>
   </div>
 </nav>
 
@@ -10,9 +15,8 @@
     <div class="card-header bg-white py-3">
       <h5 class="mb-0 text-secondary">Registro Global de Visitas</h5>
     </div>
-    
+         
     <div class="card-body p-0">
-      
       <!-- Indicador de Carga -->
       <div *ngIf="isLoading" class="text-center py-5">
         <div class="spinner-border text-primary" role="status"></div>
@@ -38,7 +42,6 @@
           </thead>
           <tbody>
             <tr *ngFor="let v of visits">
-              <!-- Cambiamos v.visitId por (v.id || v.visitId) -->
               <td class="px-4 fw-bold text-secondary">#{{ v.id || v.visitId }}</td>
               <td>{{ v.clientName || 'Cliente ' + (v.id || v.visitId) }}</td>
               <td>{{ v.visitDate | date:'medium' }}</td>
@@ -46,7 +49,6 @@
                 <span class="badge bg-info text-dark">{{ v.result || 'Registrada' }}</span>
               </td>
               <td class="text-end px-4">
-                <!-- AQUI ESTABA EL ERROR: Pasamos el id correcto a la función -->
                 <button class="btn btn-sm btn-primary" (click)="verDetalle(v.id || v.visitId)">
                   Ver Detalle
                 </button>
@@ -55,7 +57,6 @@
           </tbody>
         </table>
       </div>
-
     </div>
   </div>
 </div>

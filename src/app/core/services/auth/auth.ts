@@ -16,20 +16,24 @@ export class AuthService {
       map(users => {
         if (users && users.length > 0) {
           return {
+            id: users[0].id, // <--- Capturamos el ID del usuario/agente
             token: users[0].token,
             role: users[0].role
           };
         }
-        // Rol por defecto si las credenciales no coinciden exactamente en mock
         return {
+          id: 2, // Fallback para Agente 1
           token: 'mock-agent-token',
           role: 'AGENTE'
         };
       }),
-      tap(response => {
+      tap((response: any) => {
         if (response?.token) {
           localStorage.setItem('token', response.token);
           localStorage.setItem('role', response.role);
+          if (response.id) {
+            localStorage.setItem('userId', response.id.toString()); // <--- Guardamos el userId
+          }
         }
       })
     );
@@ -43,9 +47,15 @@ export class AuthService {
     return localStorage.getItem('role');
   }
 
+  getUserId(): number | null {
+    const id = localStorage.getItem('userId');
+    return id ? Number(id) : null;
+  }
+
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('userId'); // <--- Limpiamos el userId al salir
   }
 
   isAuthenticated(): boolean {
