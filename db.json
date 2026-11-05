@@ -136,6 +136,30 @@
       }
     ]
   },
-  "visitas": [],
+  "visitas": [
+    {
+      "clientId": 1,
+      "addressId": 1,
+      "addressTypeId": 1,
+      "actionCodeId": 1,
+      "resultId": 1,
+      "noPaymentReasonId": 1,
+      "attendedBy": "Familiar del titular (Prueba)",
+      "comments": "Visita de prueba generada automáticamente mediante rellenado rápido. Todo en orden.",
+      "businessActivity": "Comercio General / Abarrotes",
+      "isOperating": "SI",
+      "visitedAt": "2026-11-02T18:52",
+      "latitude": 19.0486,
+      "longitude": -98.1904,
+      "additionalContactName": "Contacto de Prueba",
+      "additionalContactPhone": "2221234567",
+      "additionalContactEmail": "prueba@correo.com",
+      "paymentPromise": {
+        "amount": 2500.5,
+        "promisedDate": "2026-11-04"
+      },
+      "id": "rQJOJiZnEO0"
+    }
+  ],
   "$schema": "./node_modules/json-server/schema.json"
 }

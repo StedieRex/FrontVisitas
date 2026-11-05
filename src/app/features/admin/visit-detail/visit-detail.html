@@ -1,12 +1,11 @@
 <nav class="navbar navbar-dark bg-dark shadow-sm">
   <div class="container-fluid">
-    <span class="navbar-brand mb-0 h1">Panel de Administrador - Detalle</span>
+    <span class="navbar-brand mb-0 h1">Panel de Administrador - Detalle de Visita</span>
     <button class="btn btn-outline-light btn-sm" (click)="volver()">Volver al Historial</button>
   </div>
 </nav>
 
 <div class="container mt-4 mb-5">
-  
   <div *ngIf="isLoading" class="text-center py-5">
     <div class="spinner-border text-primary" role="status"></div>
     <p class="mt-2 text-muted">Cargando información de la visita...</p>
@@ -14,45 +13,124 @@
 
   <div *ngIf="!isLoading && visit" class="card shadow-sm">
     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-      <h5 class="mb-0 text-secondary">Visita #{{ visit.visitId || visit.id }}</h5>
-      <span class="badge bg-success">Completada</span>
+      <h5 class="mb-0 text-secondary fw-bold">Visita #{{ visit.visitId || visit.id }}</h5>
+      <span class="badge bg-success px-3 py-2">{{ visit.result || visit.resultId || 'Registrada' }}</span>
     </div>
     
-    <div class="card-body">
-      <div class="row">
+    <div class="card-body p-4">
+      <div class="row g-4">
         
-        <!-- Columna de Datos de Texto -->
-        <div class="col-md-7">
-          <h6 class="text-primary border-bottom pb-2 mb-3">Información General</h6>
-          <p><strong>Cliente:</strong> {{ visit.clientName || 'N/A' }}</p>
-          <p><strong>Atendido por:</strong> {{ visit.attendedBy || 'N/A' }} ({{ visit.kinship || 'N/A' }})</p>
-          <p><strong>Fecha de Visita:</strong> {{ visit.visitDate | date:'medium' }}</p>
+        <!-- COLUMNA IZQUIERDA: DATOS COMPLETOS -->
+        <div class="col-lg-7">
           
-          <h6 class="text-primary border-bottom pb-2 mb-3 mt-4">Detalles del Inmueble y Negocio</h6>
-          <p><strong>Descripción:</strong> {{ visit.propertyDescription || 'N/A' }}</p>
-          <p><strong>Actividad Comercial:</strong> {{ visit.businessActivity || 'N/A' }}</p>
-          <p><strong>¿Se encuentra operando?:</strong> {{ visit.isOperating || 'N/A' }}</p>
-
-          <h6 class="text-primary border-bottom pb-2 mb-3 mt-4">Resultados</h6>
-          <p><strong>Comentarios:</strong> {{ visit.comments || 'Sin comentarios adicionales.' }}</p>
-          
-          <div *ngIf="visit.paymentPromise" class="alert alert-info mt-3">
-            <strong>Promesa de Pago:</strong> ${{ visit.paymentPromise.amount }} para el {{ visit.paymentPromise.promisedDate | date:'longDate' }}
+          <!-- 1. Datos del Auditado (Solo Lectura) -->
+          <h6 class="text-primary border-bottom pb-2 mb-3 fw-bold">1. Datos del Auditado</h6>
+          <div class="row mb-4 g-3">
+            <div class="col-sm-6">
+              <label class="text-muted small">Cliente / N° Crédito</label>
+              <div class="fw-semibold">{{ visit.clientName || 'N/A' }} ({{ visit.creditNumber || 'N/A' }})</div>
+            </div>
+            <div class="col-sm-6">
+              <label class="text-muted small">Despacho</label>
+              <div class="fw-semibold">{{ visit.despacho || 'N/A' }}</div>
+            </div>
+            <div class="col-sm-6">
+              <label class="text-muted small">Portafolio</label>
+              <div class="fw-semibold">{{ visit.portfolio || 'N/A' }}</div>
+            </div>
           </div>
+
+          <!-- 2. Detalles de la Visita -->
+          <h6 class="text-primary border-bottom pb-2 mb-3 fw-bold">2. Detalles de la Visita</h6>
+          <div class="row mb-4 g-3">
+            <div class="col-sm-6">
+              <label class="text-muted small">Fecha de Visita</label>
+              <div class="fw-semibold">{{ (visit.visitDate || visit.visitedAt) | date:'medium' }}</div>
+            </div>
+            <div class="col-sm-6">
+              <label class="text-muted small">Atendido por</label>
+              <div class="fw-semibold">{{ visit.attendedBy || 'N/A' }}</div>
+            </div>
+            <div class="col-sm-12">
+              <label class="text-muted small">Domicilio Visitado</label>
+              <div class="fw-semibold">{{ visit.fullAddress || visit.addressId || 'N/A' }}</div>
+            </div>
+            <div class="col-sm-6">
+              <label class="text-muted small">Código de Acción</label>
+              <div class="fw-semibold">{{ visit.actionCode || visit.actionCodeId || 'N/A' }}</div>
+            </div>
+            <div class="col-sm-6" *ngIf="visit.noPaymentReasonId || visit.noPaymentReason">
+              <label class="text-muted small">Razón de No Pago</label>
+              <div class="fw-semibold">{{ visit.noPaymentReason || visit.noPaymentReasonId }}</div>
+            </div>
+          </div>
+
+          <!-- 3. Inmueble y Negocio -->
+          <h6 class="text-primary border-bottom pb-2 mb-3 fw-bold">3. Inmueble y Negocio</h6>
+          <div class="row mb-4 g-3">
+            <div class="col-sm-6">
+              <label class="text-muted small">Giro / Actividad</label>
+              <div class="fw-semibold">{{ visit.businessActivity || 'N/A' }}</div>
+            </div>
+            <div class="col-sm-6">
+              <label class="text-muted small">¿Se encuentra operando?</label>
+              <div class="fw-semibold">{{ visit.isOperating || 'N/A' }}</div>
+            </div>
+            <div class="col-sm-12">
+              <label class="text-muted small">Comentarios / Descripción</label>
+              <div class="fw-semibold text-break">{{ visit.comments || 'Sin comentarios.' }}</div>
+            </div>
+          </div>
+
+          <!-- 4. Geolocalización y Contacto -->
+          <h6 class="text-primary border-bottom pb-2 mb-3 fw-bold">4. Geolocalización y Contacto</h6>
+          <div class="row mb-4 g-3">
+            <div class="col-sm-6">
+              <label class="text-muted small">Coordenadas GPS</label>
+              <div class="fw-semibold">
+                Lat: {{ visit.latitude || 'N/A' }} <br>
+                Lng: {{ visit.longitude || 'N/A' }}
+              </div>
+            </div>
+            <div class="col-sm-6" *ngIf="visit.additionalContactName">
+              <label class="text-muted small">Contacto Adicional</label>
+              <div class="fw-semibold">
+                {{ visit.additionalContactName }} <br>
+                <span *ngIf="visit.additionalContactPhone">Tel: {{ visit.additionalContactPhone }}<br></span>
+                <span *ngIf="visit.additionalContactEmail">Email: {{ visit.additionalContactEmail }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. Promesa de Pago -->
+          <div *ngIf="visit.paymentPromise" class="alert alert-info shadow-sm mt-2 border-0 border-start border-info border-4">
+            <h6 class="alert-heading fw-bold mb-2">Promesa de Pago Registrada</h6>
+            <div class="d-flex justify-content-between">
+              <div>
+                <span class="text-muted small d-block">Monto Acordado</span>
+                <strong>${{ visit.paymentPromise.amount }}</strong>
+              </div>
+              <div class="text-end">
+                <span class="text-muted small d-block">Fecha de Cumplimiento</span>
+                <strong>{{ visit.paymentPromise.promisedDate | date:'longDate' }}</strong>
+              </div>
+            </div>
+          </div>
+
         </div>
 
-        <!-- Columna de Evidencia Fotográfica -->
-        <div class="col-md-5 border-start">
-          <h6 class="text-primary border-bottom pb-2 mb-3">Evidencia Fotográfica</h6>
+        <!-- COLUMNA DERECHA: EVIDENCIA FOTOGRÁFICA -->
+        <div class="col-lg-5 border-start-lg">
+          <h6 class="text-primary border-bottom pb-2 mb-3 fw-bold">Evidencia Fotográfica</h6>
           
-          <div *ngIf="visit.photoUrl; else noPhoto" class="text-center">
-            <!-- Si tu backend devuelve la URL o el Base64 de la foto -->
-            <img [src]="visit.photoUrl" alt="Evidencia de Visita" class="img-fluid rounded shadow-sm" style="max-height: 400px; width: auto;">
+          <div *ngIf="visit.photoUrl; else noPhoto" class="text-center bg-light p-2 rounded border">
+            <img [src]="visit.photoUrl" alt="Evidencia de Visita" class="img-fluid rounded shadow-sm w-100" style="max-height: 600px; object-fit: contain;">
           </div>
           
           <ng-template #noPhoto>
-            <div class="alert alert-secondary text-center py-4">
-              <p class="mb-0 text-muted">No se adjuntó fotografía en esta visita.</p>
+            <div class="alert alert-secondary text-center py-5 d-flex flex-column align-items-center justify-content-center h-100 border-0">
+              <span class="display-4 text-muted mb-3">📷</span>
+              <p class="mb-0 text-muted fw-semibold">No se adjuntó evidencia fotográfica.</p>
             </div>
           </ng-template>
         </div>

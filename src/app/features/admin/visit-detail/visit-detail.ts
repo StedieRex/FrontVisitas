@@ -21,14 +21,15 @@ export class VisitDetail implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Extraemos el ID de la URL
+    // Extraemos el ID tal cual como string sin usar Number()
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.cargarDetalle(Number(id));
+      this.cargarDetalle(id); 
     }
   }
 
-  cargarDetalle(id: number) {
+  // Actualizamos el tipo de dato aceptado a string | number
+  cargarDetalle(id: string | number) {
     this.visitService.getVisitById(id).subscribe({
       next: (data) => {
         this.visit = data;

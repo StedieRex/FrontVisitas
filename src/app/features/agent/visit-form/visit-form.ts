@@ -145,6 +145,44 @@ export class VisitForm implements OnInit {
     }
   }
 
+  rellenadoRapido() {
+    // 1. Si no hay cliente seleccionado, auto-seleccionamos el primero de la lista
+    if (!this.visitForm.get('clientId')?.value && this.clients.length > 0) {
+      const primerCliente = this.clients[0];
+      this.visitForm.patchValue({ clientId: primerCliente.id });
+      
+      // Disparamos manualmente el cambio para que cargue las direcciones
+      this.onClientChange({ target: { value: primerCliente.id } });
+    }
+
+    // 2. Generamos fechas de prueba (Hoy y Mañana)
+    const hoy = new Date();
+    // Formato datetime-local: YYYY-MM-DDThh:mm
+    const strHoy = new Date(hoy.getTime() - (hoy.getTimezoneOffset() * 60000)).toISOString().slice(0, 16); 
+    
+    const manana = new Date(hoy);
+    manana.setDate(manana.getDate() + 1);
+    const strManana = manana.toISOString().split('T')[0]; // Formato date: YYYY-MM-DD
+
+    // 3. Inyectamos los datos al formulario ignorando latitud, longitud y archivo fotográfico
+    this.visitForm.patchValue({
+      visitDate: strHoy,
+      addressTypeId: this.addressTypes.length > 0 ? this.addressTypes[0].id : '',
+      attendedBy: 'Familiar del titular (Prueba)',
+      actionCodeId: this.actionCodes.length > 0 ? this.actionCodes[0].id : '',
+      resultId: this.visitResults.length > 0 ? this.visitResults[0].id : '',
+      noPaymentReasonId: this.noPaymentReasons.length > 0 ? this.noPaymentReasons[0].id : '',
+      promiseAmount: 2500.50,
+      promiseDate: strManana,
+      comments: 'Visita de prueba generada automáticamente mediante rellenado rápido. Todo en orden.',
+      businessActivity: 'Comercio General / Abarrotes',
+      isOperating: 'SI',
+      additionalContactName: 'Contacto de Prueba',
+      additionalContactPhone: '2221234567',
+      additionalContactEmail: 'prueba@correo.com'
+    });
+  }
+
   onSubmit() {
     if (this.visitForm.invalid) {
       this.visitForm.markAllAsTouched();
