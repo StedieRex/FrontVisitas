@@ -31,6 +31,8 @@ export class VisitForm implements OnInit {
   isSubmitting = false;
   successMessage = '';
 
+  photoPreview: string | null = null;
+
   // 2. INYECTAR ROUTER EN EL CONSTRUCTOR
   constructor(
     private fb: FormBuilder, 
@@ -120,29 +122,56 @@ export class VisitForm implements OnInit {
     }
   }
 
-  onFileChange(event: any) {
-    if (event.target.files && event.target.files.length > 0) {
-      this.selectedFile = event.target.files[0];
+  async obtenerUbicacion() {
+    if (!navigator.geolocation) {
+    alert('Tu dispositivo o navegador no soporta la geolocalización.');
+    return;
     }
-  }
 
-  obtenerUbicacion() {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          this.visitForm.patchValue({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude
-          });
-        },
-        (error) => {
-          alert('Error al obtener la ubicación GPS.');
-          console.error(error);
+    // 1. Verificar proactivamente el estado del permiso
+    try {
+      if (navigator.permissions) {
+        const permission = await navigator.permissions.query({ name: 'geolocation' });
+        
+        if (permission.state === 'denied') {
+          alert('❌ El acceso al GPS está bloqueado.\n\nPara solucionarlo: Toca el icono de candado o configuración junto a la barra de direcciones de tu navegador, elige "Permisos", habilita la "Ubicación" y vuelve a intentarlo.');
+          return; // Detenemos la ejecución porque sabemos que fallará
         }
-      );
-    } else {
-      alert('Tu navegador no soporta geolocalización.');
+      }
+    } catch (error) {
+      console.warn('El navegador no soporta la API de Permisos, continuando...', error);
     }
+
+    // 2. Si no está denegado, solicitamos la ubicación (esto lanza el prompt si está en estado 'prompt')
+    console.log('Solicitando ubicación... el navegador preguntará si es necesario.');
+    
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        // Éxito: Guardamos las coordenadas en el formulario
+        this.visitForm.patchValue({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude
+        });
+        console.log('Ubicación exitosa:', position.coords.latitude, position.coords.longitude);
+      },
+      (error) => {
+        // Manejo de errores en caso de que lo deniegue en ese instante o falle el hardware
+        let mensaje = 'Error desconocido al intentar conectar con el GPS.';
+        if (error.code === error.PERMISSION_DENIED) {
+          mensaje = 'Cancelaste el permiso de ubicación. Es obligatorio para continuar.';
+        } else if (error.code === error.POSITION_UNAVAILABLE) {
+          mensaje = 'No se pudo obtener señal GPS. Comprueba que la "Ubicación" esté encendida en los ajustes rápidos de tu teléfono.';
+        } else if (error.code === error.TIMEOUT) {
+          mensaje = 'Se agotó el tiempo esperando la señal GPS. Intenta ponerte cerca de una ventana o al aire libre.';
+        }
+        alert(mensaje);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
   }
 
   rellenadoRapido() {
@@ -244,6 +273,40 @@ export class VisitForm implements OnInit {
     });
   }
 
+  // 3. ACTUALIZAR LOGOUT PARA REDIRIGIR A LOGIN
+  logout() {
+    this.authService.logout();
+    this.router.navigate(['/login']);
+  }
+
+  // Actualiza tu método onFileChange existente:
+  onFileChange(event: any) {
+    if (event.target.files && event.target.files.length > 0) {
+      // 1. Extraemos el archivo en una constante local (TypeScript ahora sabe que existe sí o sí)
+      const file = event.target.files[0];
+      
+      // 2. Lo asignamos a la variable de la clase para enviarlo al backend luego
+      this.selectedFile = file;
+      
+      // 3. Generamos la previsualización usando la constante local
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.photoPreview = e.target.result;
+      };
+      reader.readAsDataURL(file); 
+    }
+  }
+
+  // NUEVO MÉTODO para descartar la foto
+  quitarFoto() {
+    this.selectedFile = null;
+    this.photoPreview = null;
+    if (this.fileInput) {
+      this.fileInput.nativeElement.value = '';
+    }
+  }
+
+  // Actualiza tu método finalizarFormulario para limpiar la previsualización tras el guardado
   private finalizarFormulario() {
     this.isSubmitting = false;
     this.successMessage = '¡Visita registrada exitosamente!';
@@ -252,15 +315,12 @@ export class VisitForm implements OnInit {
     });
     this.selectedClient = null;
     this.selectedFile = null;
+    this.photoPreview = null; // Limpiar la imagen mostrada
     this.availableAddresses = [];
     if (this.fileInput) this.fileInput.nativeElement.value = '';
     
     setTimeout(() => this.successMessage = '', 4000);
   }
 
-  // 3. ACTUALIZAR LOGOUT PARA REDIRIGIR A LOGIN
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
+
 }

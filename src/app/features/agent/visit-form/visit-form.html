@@ -178,9 +178,33 @@
           </div>
         </div>
 
-        <h6 class="text-primary mb-3">Evidencia Fotográfica</h6>
+        <h6 class="text-primary mb-3 fw-bold">Evidencia Fotográfica</h6>
         <div class="mb-4">
-          <input #fileInput class="form-control" type="file" accept="image/*" (change)="onFileChange($event)">
+          <label class="form-label fw-semibold">Tomar Fotografía (Obligatorio/Opcional)</label>
+          
+          <!-- El atributo capture="environment" fuerza a abrir la cámara trasera en móviles -->
+          <input 
+            #fileInput 
+            class="form-control form-control-lg bg-light" 
+            type="file" 
+            accept="image/*" 
+            capture="environment" 
+            (change)="onFileChange($event)">
+            
+          <div class="form-text mt-1 text-muted">
+            En dispositivos móviles se abrirá la cámara trasera automáticamente.
+          </div>
+
+          <!-- Contenedor para previsualizar la foto capturada -->
+          <div *ngIf="photoPreview" class="mt-3 text-center position-relative bg-light p-2 border rounded">
+            <p class="text-success small fw-bold mb-2">Foto capturada correctamente</p>
+            <img [src]="photoPreview" class="img-fluid rounded shadow-sm" style="max-height: 250px; object-fit: contain;" alt="Previsualización de evidencia">
+            
+            <!-- Botón para descartar la foto si salió mal -->
+            <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 shadow" (click)="quitarFoto()">
+              X Quitar
+            </button>
+          </div>
         </div>
 
       </div>
