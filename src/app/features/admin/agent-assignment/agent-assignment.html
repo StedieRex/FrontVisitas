@@ -1,6 +1,6 @@
 <nav class="navbar navbar-dark bg-dark shadow-sm">
   <div class="container-fluid">
-    <span class="navbar-brand mb-0 h1">Panel Admin - Asignación de Agentes y Carga de Auditoría</span>
+    <span class="navbar-brand mb-0 h1">Panel Admin - Carga de Auditoría y Asignación</span>
     <button class="btn btn-outline-light btn-sm" (click)="volver()">Volver al Historial</button>
   </div>
 </nav>
@@ -8,7 +8,7 @@
 <div class="container mt-4 mb-5">
   <div class="card shadow-sm">
     <div class="card-header bg-primary text-white fw-bold">
-      Asignar Clientes y Datos de Auditoría vía CSV
+      Cargar Clientes y Asignar Agentes vía CSV
     </div>
     <div class="card-body">
       
@@ -20,23 +20,12 @@
       </div>
 
       <form (ngSubmit)="onSubmitAssignment()">
-        <!-- 1. SELECCIÓN DE AGENTE -->
+        <!-- CARGA DE ARCHIVO CSV -->
         <div class="mb-4">
-          <label class="form-label fw-bold">1. Selecciona el Agente Responsable</label>
-          <select class="form-select form-select-lg" [(ngModel)]="selectedAgentId" name="selectedAgentId" required>
-            <option [ngValue]="null" disabled selected>-- Selecciona un agente --</option>
-            <option *ngFor="let agent of agents" [value]="agent.id">
-              {{ agent.name || agent.email }} (ID: {{ agent.id }})
-            </option>
-          </select>
-        </div>
-
-        <!-- 2. CARGA DE ARCHIVO CSV -->
-        <div class="mb-4">
-          <label class="form-label fw-bold">2. Subir Archivo CSV con Datos de Auditoría</label>
+          <label class="form-label fw-bold">1. Subir Archivo CSV</label>
           <input class="form-control" type="file" accept=".csv" (change)="onFileSelected($event)" required>
           <div class="form-text">
-            El archivo debe incluir los encabezados: <code>creditNumber,clientName,despacho,portfolio,street,number,neighborhood,city,state,zipCode</code>.
+            El archivo debe incluir los encabezados exactos: <code>idAgent,creditNumber,clientName,despacho,portfolio,street,number,neighborhood,city,state,zipCode</code>.
           </div>
         </div>
 
@@ -47,19 +36,19 @@
             <table class="table table-sm table-striped mb-0">
               <thead class="table-light">
                 <tr>
+                  <th>ID Agente</th>
                   <th>N° Crédito</th>
                   <th>Cliente</th>
                   <th>Despacho</th>
-                  <th>Portafolio</th>
                   <th>Domicilio</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngFor="let c of parsedClients">
+                  <td class="fw-bold text-primary">{{ c.agentId }}</td>
                   <td class="fw-bold">{{ c.creditNumber }}</td>
                   <td>{{ c.name }}</td>
                   <td>{{ c.despacho }}</td>
-                  <td>{{ c.portfolio }}</td>
                   <td>{{ c.addresses[0]?.street }} {{ c.addresses[0]?.number }}, {{ c.addresses[0]?.city }}</td>
                 </tr>
               </tbody>
@@ -68,9 +57,9 @@
         </div>
 
         <!-- BOTÓN DE CONFIRMACIÓN -->
-        <button type="submit" class="btn btn-success w-100 py-2 fw-bold" [disabled]="isProcessing || !selectedAgentId || parsedClients.length === 0">
+        <button type="submit" class="btn btn-success w-100 py-2 fw-bold" [disabled]="isProcessing || parsedClients.length === 0">
           <span *ngIf="isProcessing" class="spinner-border spinner-border-sm me-2"></span>
-          {{ isProcessing ? 'Guardando Asignaciones...' : 'Asignar Clientes y Datos de Auditoría' }}
+          {{ isProcessing ? 'Procesando y Guardando Asignaciones...' : 'Asignar Clientes y Datos de Auditoría' }}
         </button>
       </form>
 

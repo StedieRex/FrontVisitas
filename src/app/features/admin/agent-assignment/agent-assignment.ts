@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -10,9 +10,7 @@ import { VisitService } from '../../../core/services/visit/visit';
   imports: [CommonModule, FormsModule],
   templateUrl: './agent-assignment.html'
 })
-export class AgentAssignment implements OnInit {
-  agents: any[] = [];
-  selectedAgentId: number | null = null;
+export class AgentAssignment {
   selectedFile: File | null = null;
   parsedClients: any[] = [];
   isProcessing = false;
@@ -20,17 +18,6 @@ export class AgentAssignment implements OnInit {
   errorMessage = '';
 
   constructor(private visitService: VisitService, private router: Router) {}
-
-  ngOnInit() {
-    this.cargarAgentes();
-  }
-
-  cargarAgentes() {
-    this.visitService.getAgents().subscribe({
-      next: (data) => this.agents = data,
-      error: (err) => console.error('Error al cargar agentes:', err)
-    });
-  }
 
   onFileSelected(event: any) {
     const file = event.target.files[0];
@@ -66,15 +53,17 @@ export class AgentAssignment implements OnInit {
 
     for (let i = 1; i < lines.length; i++) {
       const values = lines[i].split(',').map(v => v.trim());
+      
+      // Validamos que la fila tenga la misma cantidad de columnas que los encabezados
       if (values.length === headers.length) {
         const row: any = {};
         headers.forEach((header, index) => {
           row[header] = values[index];
         });
 
-        // Construcción de la estructura DTO para el cliente y sus datos de auditoría
-        // En agent-assignment.ts -> procesarContenidoCSV()
+        // Construcción de la estructura DTO incluyendo el agentId desde el CSV (idAgent)
         clients.push({
+          agentId: Number(row.idAgent),
           creditNumber: row.creditNumber,
           name: row.clientName,
           despacho: row.despacho,
@@ -90,7 +79,6 @@ export class AgentAssignment implements OnInit {
               zipCode: row.zipCode
             }
           ]
-          // NOTA: No incluimos "clientId: 101" para evitar IDs duplicados
         });
       }
     }
@@ -99,10 +87,6 @@ export class AgentAssignment implements OnInit {
   }
 
   onSubmitAssignment() {
-    if (!this.selectedAgentId) {
-      this.errorMessage = 'Debes seleccionar un agente.';
-      return;
-    }
     if (this.parsedClients.length === 0) {
       this.errorMessage = 'Debes cargar un archivo CSV con datos válidos.';
       return;
@@ -111,16 +95,14 @@ export class AgentAssignment implements OnInit {
     this.isProcessing = true;
     let guardados = 0;
 
-    // Asignar el ID del agente seleccionado a cada cliente procesado del CSV
     this.parsedClients.forEach(client => {
-      client.agentId = Number(this.selectedAgentId);
-
+      // El client.agentId ya viene inyectado desde la lectura del CSV
       this.visitService.assignClientWithAuditData(client).subscribe({
         next: () => {
           guardados++;
           if (guardados === this.parsedClients.length) {
             this.isProcessing = false;
-            this.successMessage = `¡Se asignaron exitosamente ${guardados} cliente(s) con sus datos de auditoría!`;
+            this.successMessage = `¡Se asignaron exitosamente ${guardados} cliente(s) a sus respectivos agentes!`;
             this.resetForm();
           }
         },
@@ -134,9 +116,11 @@ export class AgentAssignment implements OnInit {
   }
 
   resetForm() {
-    this.selectedAgentId = null;
     this.selectedFile = null;
     this.parsedClients = [];
+    // Resetea el input de tipo archivo si es necesario desde la vista
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
   }
 
   volver() {

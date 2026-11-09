@@ -17,12 +17,12 @@
       "name": "Carlos López (Agente 1)"
     },
     {
-      "id": "2",
-      "email": "agente1@correo.com",
+      "id": "3",
+      "email": "agente2@correo.com",
       "password": "123",
-      "token": "token-agente-1",
+      "token": "token-agente-2",
       "role": "AGENTE",
-      "name": "Carlos López (Agente 1)"
+      "name": "Luis Pach (Agente 2)"
     }
   ],
   "clientes": [
@@ -47,13 +47,14 @@
       ]
     },
     {
+      "agentId": 2,
       "creditNumber": "CR-2001",
       "name": "Carlos Mendoza",
       "despacho": "Despacho Central",
       "portfolio": "Portafolio A",
       "addresses": [
         {
-          "id": 1793236884083,
+          "id": 1793999547075,
           "street": "Av. Reforma",
           "number": "123",
           "neighborhood": "Centro",
@@ -62,18 +63,17 @@
           "zipCode": "72000"
         }
       ],
-      "clientId": 101,
-      "agentId": 2,
-      "id": "IEuxvvUXZQA"
+      "id": "S_Dmf1Ui-Jg"
     },
     {
+      "agentId": 3,
       "creditNumber": "CR-2002",
       "name": "Beatriz Torres",
       "despacho": "Despacho Jurídico Sur",
       "portfolio": "Portafolio B",
       "addresses": [
         {
-          "id": 1793236884085,
+          "id": 1793999547076,
           "street": "Calle 5 de Mayo",
           "number": "456",
           "neighborhood": "San José",
@@ -82,9 +82,7 @@
           "zipCode": "72010"
         }
       ],
-      "clientId": 101,
-      "agentId": 2,
-      "id": "Jv5VIYQMwmo"
+      "id": "KKDF3NhLm0w"
     }
   ],
   "catalogos": {
@@ -145,7 +143,29 @@
     ]
   },
   "visitas": [
-    
+    {
+      "clientId": 1,
+      "addressId": 1,
+      "addressTypeId": 1,
+      "actionCodeId": 1,
+      "resultId": 1,
+      "noPaymentReasonId": 1,
+      "attendedBy": "Familiar del titular (Prueba)",
+      "comments": "Visita de prueba generada automáticamente mediante rellenado rápido. Todo en orden.",
+      "businessActivity": "Comercio General / Abarrotes",
+      "isOperating": "SI",
+      "visitedAt": "2026-11-06T15:31",
+      "latitude": 19.0486,
+      "longitude": -98.1904,
+      "additionalContactName": "Contacto de Prueba",
+      "additionalContactPhone": "2221234567",
+      "additionalContactEmail": "prueba@correo.com",
+      "paymentPromise": {
+        "amount": 2500.5,
+        "promisedDate": "2026-11-07"
+      },
+      "id": "9QRXB3i0WBM"
+    }
   ],
   "$schema": "./node_modules/json-server/schema.json"
 }
