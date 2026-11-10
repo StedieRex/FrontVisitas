@@ -1,15 +1,30 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, forkJoin, map } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import { VisitListDTO } from '../../models/visit.model';
+import { ApiResponse } from '../../models/auth.model';
+
+export interface CatalogItem {
+  id: number;
+  code: string;
+  description: string;
+}
+
+export interface CatalogsData {
+  actionCodes: CatalogItem[];
+  visitResults: CatalogItem[];
+  noPaymentReasons: CatalogItem[];
+  addressTypes: CatalogItem[];
+  portfolios: CatalogItem[];
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class VisitService {
   private http = inject(HttpClient);
-  private baseUrl = environment.apiUrl; // Apunta directamente a http://localhost:3000
+  private baseUrl = environment.apiUrl;
 
   // ==========================================
   // 1. ENDPOINTS DE VISITAS (/visitas)
@@ -71,7 +86,32 @@ export class VisitService {
   // ==========================================
   // 4. ENDPOINTS DE CATÁLOGOS (/catalogos)
   // ==========================================
-  getCatalogs(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/catalogos`);
+  getCatalogs(): Observable<CatalogsData> {
+    // Definimos las 5 peticiones GET individuales hacia el nuevo backend
+    const actionCodes$ = this.http.get<ApiResponse<CatalogItem[]>>(`${this.baseUrl}/action-codes`);
+    const visitResults$ = this.http.get<ApiResponse<CatalogItem[]>>(`${this.baseUrl}/visit-results`);
+    const noPaymentReasons$ = this.http.get<ApiResponse<CatalogItem[]>>(`${this.baseUrl}/no-payment-reasons`);
+    const addressTypes$ = this.http.get<ApiResponse<CatalogItem[]>>(`${this.baseUrl}/address-types`);
+    const portfolios$ = this.http.get<ApiResponse<CatalogItem[]>>(`${this.baseUrl}/portfolios`);
+
+    // Usamos forkJoin para disparar las 5 llamadas en paralelo y esperar a que todas terminen
+    return forkJoin([
+      actionCodes$,
+      visitResults$,
+      noPaymentReasons$,
+      addressTypes$,
+      portfolios$
+    ]).pipe(
+      // Mapeamos el arreglo de respuestas globales extrayendo la propiedad .data de cada una
+      map(([acRes, vrRes, npRes, atRes, pRes]) => {
+        return {
+          actionCodes: acRes.data,
+          visitResults: vrRes.data,
+          noPaymentReasons: npRes.data,
+          addressTypes: atRes.data,
+          portfolios: pRes.data
+        };
+      })
+    );
   }
 }
