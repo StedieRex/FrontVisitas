@@ -1,39 +1,31 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map, tap } from 'rxjs';
+import { Observable, tap, map, catchError, of } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { AuthRequest, AuthResponse } from '../../models/auth.model';
+import { AuthRequest, ApiResponse, AuthData } from '../../models/auth.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private http = inject(HttpClient);
-  private apiUrl = environment.apiUrl;
+  // Asegúrate de que environment.apiUrl apunte a la base de tu nuevo backend (ej. http://localhost:8080/api)
+  private apiUrl = environment.apiUrl; 
 
-  login(credentials: AuthRequest): Observable<AuthResponse> {
-    return this.http.get<any[]>(`${this.apiUrl}/users?email=${credentials.email}`).pipe(
-      map(users => {
-        if (users && users.length > 0) {
-          return {
-            id: users[0].id, // <--- Capturamos el ID del usuario/agente
-            token: users[0].token,
-            role: users[0].role
-          };
-        }
-        return {
-          id: 2, // Fallback para Agente 1
-          token: 'mock-agent-token',
-          role: 'AGENTE'
-        };
-      }),
-      tap((response: any) => {
-        if (response?.token) {
-          localStorage.setItem('token', response.token);
-          localStorage.setItem('role', response.role);
-          if (response.id) {
-            localStorage.setItem('userId', response.id.toString()); // <--- Guardamos el userId
-          }
+  login(credentials: AuthRequest): Observable<AuthData> {
+    // 1. Llamada POST al nuevo backend
+    return this.http.post<ApiResponse<AuthData>>(`${this.apiUrl}/auth/login`, credentials).pipe(
+      // 2. Extraemos la propiedad "data" del response global
+      map(response => response.data),
+      
+      // 3. Procesamos los datos extraídos para guardarlos en localStorage
+      tap((authData: AuthData) => {
+        if (authData && authData.accessToken) {
+          // Guardamos el JWT y la información básica del usuario
+          localStorage.setItem('token', authData.accessToken);
+          localStorage.setItem('role', authData.user.role);
+          localStorage.setItem('userId', authData.user.id.toString());
+          localStorage.setItem('userName', authData.user.name);
         }
       })
     );
@@ -52,10 +44,24 @@ export class AuthService {
     return id ? Number(id) : null;
   }
 
-  logout(): void {
+  logout(): Observable<any> {
+    // Llamada al endpoint real para invalidar la cookie refresh_token
+    return this.http.post<ApiResponse<any>>(`${this.apiUrl}/auth/logout`, {}).pipe(
+      tap(() => this.limpiarSesionLocal()),
+      catchError((err) => {
+        console.error('Error al notificar el cierre de sesión al servidor', err);
+        // Aunque el servidor falle (ej. sin conexión), limpiamos la sesión localmente
+        this.limpiarSesionLocal();
+        return of(null);
+      })
+    );
+  }
+
+  private limpiarSesionLocal(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-    localStorage.removeItem('userId'); // <--- Limpiamos el userId al salir
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userName');
   }
 
   isAuthenticated(): boolean {
