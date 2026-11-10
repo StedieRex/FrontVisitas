@@ -28,36 +28,42 @@ export class Login {
   }
 
   onSubmit() {
-    if (this.loginForm.valid) {
-      this.isLoading = true;
-      this.errorMessage = '';
-
-      this.authService.login(this.loginForm.value).subscribe({
-        next: (response) => {
-          // Redirigir según el rol devuelto por el backend
-          // Nota: El backend de producción usa SUPERADMIN/ADMIN/USER. 
-          // Asegúrate de mapearlo correctamente a tus rutas.
-          const role = response.user.role; 
-
-          if (role === 'SUPERADMIN' || role === 'ADMIN' || role === 'ADMINISTRADOR') {
-            this.router.navigate(['/admin']);
-          } else {
-            this.router.navigate(['/agente']);
-          }
-        },
-        error: (err) => {
-          this.isLoading = false;
-          // Manejo del error 401 y 429 especificados en la documentación
-          if (err.status === 401) {
-            this.errorMessage = 'Credenciales inválidas. Verifica tu correo y contraseña.';
-          } else if (err.status === 429) {
-            this.errorMessage = 'Demasiados intentos fallidos. Por favor, espera 15 minutos.';
-          } else {
-            this.errorMessage = 'Ocurrió un error al intentar iniciar sesión.';
-          }
-          console.error('Error de login', err);
-        }
-      });
+    if (this.loginForm.invalid) {
+      return;
     }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.authService.login(this.loginForm.value).subscribe({
+      next: (response) => {
+        // El rol viene directamente de response.user.role ("ADMIN" o "USER")
+        const role = response.user.role; 
+
+        if (role === 'ADMIN' || role === 'SUPERADMIN') {
+          // Redirige al panel del administrador
+          this.router.navigate(['/admin']);
+        } else if (role === 'USER') {
+          // Redirige al flujo del agente en campo
+          this.router.navigate(['/agente']);
+        } else {
+          // Manejo por seguridad si llega un rol desconocido
+          this.isLoading = false;
+          this.errorMessage = 'Tu usuario no tiene un perfil válido asignado para ingresar.';
+          this.authService.logout(); // Limpiamos la sesión por precaución
+        }
+      },
+      error: (err) => {
+        this.isLoading = false;
+        if (err.status === 401) {
+          this.errorMessage = 'Credenciales inválidas. Verifica tu correo y contraseña.';
+        } else if (err.status === 429) {
+          this.errorMessage = 'Demasiados intentos fallidos. Por favor, espera 15 minutos.';
+        } else {
+          this.errorMessage = 'Ocurrió un error al intentar iniciar sesión.';
+        }
+        console.error('Error de login', err);
+      }
+    });
   }
 }

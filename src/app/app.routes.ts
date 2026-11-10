@@ -12,25 +12,25 @@ export const routes: Routes = [
     path: 'agente', 
     component: VisitForm, 
     canActivate: [authGuard], 
-    data: { role: 'AGENTE' } 
+    data: { role: 'USER' } 
   },
   { 
     path: 'admin', 
     component: VisitGrid, 
     canActivate: [authGuard], 
-    data: { role: 'ADMINISTRADOR' } 
+    data: { role: 'ADMIN' } 
   },
   { 
     path: 'admin/visita/:id', 
     component: VisitDetail, 
     canActivate: [authGuard], 
-    data: { role: 'ADMINISTRADOR' } 
+    data: { role: 'ADMIN' } 
   },
   { 
     path: 'admin/asignacion', 
     component: AgentAssignment, 
     canActivate: [authGuard], 
-    data: { role: 'ADMINISTRADOR' } 
+    data: { role: 'ADMIN' } 
   },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' }
